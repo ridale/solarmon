@@ -38,7 +38,7 @@ char *log_path = "/var/log/solarmonj/";
 
 /**
 \brief	Log to console or syslog.
-\author rdl 
+\author rdl
 */
 void log_output(int priority, char* message)
 {
@@ -54,7 +54,7 @@ void log_output(int priority, char* message)
 
 /**
 \brief  Debug method to print buffer as hex string.
-\author rdl 
+\author rdl
 */
 void dumphex(unsigned char* buf, int buflen, int out)
 {
@@ -63,16 +63,13 @@ void dumphex(unsigned char* buf, int buflen, int out)
     else        printf("<== ");
     int i;
     for (i = 0; i < buflen; i++)
-    {
-        //if (i > 0) printf(":");
         printf("%02X", buf[i]);
-    }
     printf("\n");
 }
 
 /**
 \brief  Calculate sum as per JFY
-\author rdl 
+\author rdl
 */
 unsigned short checksum(int length)
 {
@@ -85,17 +82,17 @@ unsigned short checksum(int length)
     sum += 1;
     return sum;
 }
-     
+
 /**
 \brief  Creates a JFY inverter command.
-\author rdl 
+\author rdl
 */
 int create_command(char ctl, char func, unsigned char* data, int len)
 {
     int cmdlength = len;
     // the command cannot be greater than max unsigned byte minus overhead
     if (cmdlength > 240 ) return 0;
-        
+
     outbuffer[0] = 0xa5;
     outbuffer[1] = 0xa5;
     outbuffer[2] = sourceaddr;
@@ -118,7 +115,7 @@ int create_command(char ctl, char func, unsigned char* data, int len)
 
 /**
 \brief  Sets up the serial port for JFY comms.
-\author rdl 
+\author rdl
 */
 int open_serial(char* serial_device)
 {
@@ -142,7 +139,7 @@ int open_serial(char* serial_device)
 
 /**
 \brief  Write to the serial port
-\author rdl 
+\author rdl
 */
 int write_serial(int serfd, int cmdlength)
 {
@@ -151,7 +148,7 @@ int write_serial(int serfd, int cmdlength)
 
 /**
 \brief  Read from the serial port
-\author rdl 
+\author rdl
 */
 int read_serial(int serfd)
 {
@@ -159,7 +156,7 @@ int read_serial(int serfd)
     unsigned char ch =0;
     int numread = 0;
 
-    do 
+    do
     {
         finished++;
         int r = read(serfd, &ch, 1);
@@ -179,7 +176,7 @@ int read_serial(int serfd)
         }
     }
     while ( numread < 256 && finished < 256);
-    
+
     if (debug)
         dumphex(inbuffer, numread, 0);
 
@@ -188,7 +185,7 @@ int read_serial(int serfd)
 
 /**
 \brief  Close the serial port
-\author rdl 
+\author rdl
 */
 void close_serial(int serfd)
 {
@@ -198,7 +195,7 @@ void close_serial(int serfd)
 
 /**
 \brief  Setup the inverter for comms.
-\author rdl 
+\author rdl
 */
 int init_inverter(int serfd)
 {
@@ -206,10 +203,10 @@ int init_inverter(int serfd)
     char ctl  = 0x30;
     char func = 0x44;
     int cmdlength = create_command(ctl, func, NULL, 0);
-    
-    if (write_serial(serfd, cmdlength) != cmdlength) {
-	return -1;
-    }
+
+    if (write_serial(serfd, cmdlength) != cmdlength)
+        return -1;
+
     // wait before sending next command
     sleep(1);
 
@@ -220,6 +217,8 @@ int init_inverter(int serfd)
         len = read_serial(serfd);
         if (len < headerlen) return -1;
     }
+    else
+      return -1;
     // wait before sending next command
     sleep( 1 );
 
@@ -236,13 +235,15 @@ int init_inverter(int serfd)
         len = read_serial(serfd);
         if (len < headerlen) return -1;
     }
+    else
+      return -1;
 
     return len;
 }
 
 /**
 \brief  Read the inverter data.
-\author rdl 
+\author rdl
 */
 int read_inverter(int serfd)
 {
@@ -251,7 +252,7 @@ int read_inverter(int serfd)
     char func = 0x42;
     destaddr = 1;
     int cmdlength = create_command(ctl, func, NULL, 0);
-    
+
     if (write_serial(serfd, cmdlength) == cmdlength) {
         // get response
         len = read_serial(serfd);
@@ -262,7 +263,7 @@ int read_inverter(int serfd)
 
 /**
 \brief  Writes the inverter data
-\author rdl 
+\author rdl
 */
 int output_inverter(int csv_flag, int len)
 {
@@ -311,7 +312,7 @@ int test_inverter()
 }
 /**
 \brief  main program entry point.
-\author rdl 
+\author rdl
 */
 int main(int argc, char *argv[])
 {
@@ -365,6 +366,6 @@ exitclose:
     close(serfd);
 exit:
     serfd = -1;
-    return retval;    
+    return retval;
 }
 
