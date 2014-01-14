@@ -16,3 +16,10 @@
 *.exe
 *.out
 *.app
+
+# binary
+solarmon
+
+# backups
+*~
+
