@@ -34,7 +34,7 @@ const unsigned char sourceaddr = 1;
 unsigned char destaddr = 0;
 const int headerlen = 7;
 char *serial_device = "/dev/ttyS0";
-char *log_path = "/var/log/solarmonj/";
+char *log_path = NULL;
 
 /**
 \brief	Log to console or syslog.
@@ -265,7 +265,7 @@ int read_inverter(int serfd)
 \brief  Writes the inverter data
 \author rdl
 */
-int output_inverter(int csv_flag, int len)
+int output_inverter(int len)
 {
     if (len < headerlen + 20) return -1;
     unsigned char *buf = &inbuffer[headerlen];
@@ -286,7 +286,13 @@ int output_inverter(int csv_flag, int len)
     snprintf(str, 512, "temp:%f TodayE:%f VDC:%f I:%f VAC:%f Freq:%f CurrE:%f unk1:%f unk2:%f TotE:%f\n",
         temp, todayE, VDC, I, VAC, freq, currE, unk1, unk2, totE );
 
-    log_output(LOG_WARNING, str);
+    if (log_path == NULL) {
+      // log to syslog or console
+      log_output(LOG_WARNING, str);
+    }
+    else {
+      // log to csv file
+    }
 
     return 0;
 }
@@ -306,7 +312,7 @@ int test_inverter()
         sscanf(tmp + idx*2, "%2hhx", &val);
         inbuffer[idx] = val;
     }
-    output_inverter(0,msglen);
+    output_inverter(msglen);
 	printf("end test\n");
     return 0;
 }
@@ -316,7 +322,7 @@ int test_inverter()
 */
 int main(int argc, char *argv[])
 {
-    int csv_flag = 0, opt, retval = 0;
+    int opt, retval = 0;
 
     while ((opt = getopt(argc, argv, "dfp:l:")) != -1) {
         switch (opt)
@@ -324,9 +330,6 @@ int main(int argc, char *argv[])
         case 'd':
         	debug = 1;
         	break;
-        case 'f':
-            csv_flag = 1;
-            break;
         case 'p':
             serial_device = optarg;
             break;
@@ -360,7 +363,7 @@ int main(int argc, char *argv[])
     	goto exitclose;
     }
 
-	output_inverter(csv_flag, len);
+	output_inverter(len);
 
 exitclose:
     close(serfd);
