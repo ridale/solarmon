@@ -9,6 +9,8 @@ This program was inspired by solarmonj by Adam Gray and John Croucher https://co
 
 to build the application under Linux or OSX
 
-gcc solarmon.c -o solarmon
-
+```
+$> gcc solarmon.c -o solarmon
+$> sudo cp solarmon /usr/bin
+```
 
