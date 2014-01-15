@@ -5,7 +5,7 @@ Monitoring for JFY solar inverter written in C for linux.
 
 This is a simple program to read the inverter data from a JFY grid connected solar inverter.
 
-This program was inspired by solarmonj by Adam Gray and John Croucher https://code.google.com/p/solarmonj/
+This program was inspired by solarmonj by Adam Gray and John Croucher https://code.google.com/p/solarmonj/ and created to provide some different configuration and logging options. I have added some command line options to change the way the system connects to a serial port and logs the collected data. These modifications could also easily be added to the solarmonj program.
 
 To build the application under Linux or OSX
 
