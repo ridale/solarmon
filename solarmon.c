@@ -37,19 +37,19 @@ char *serial_device = "/dev/ttyS0";
 char *log_path = NULL;
 
 /**
-\brief	Log to console or syslog.
+\brief  Log to console or syslog.
 \author rdl
 */
 void log_output(int priority, char* message)
 {
-	if (debug) {
-		if (priority == LOG_ERR)
-			fprintf(stderr, "%s\n", message);
-		else
-			printf("%s\n", message);
-	}
-	else
-		syslog(priority, "%s", message);
+    if (debug) {
+        if (priority == LOG_ERR)
+            fprintf(stderr, "%s\n", message);
+        else
+            printf("%s\n", message);
+    }
+    else
+      syslog(priority, "%s", message);
 }
 
 /**
@@ -124,7 +124,7 @@ int open_serial(char* serial_device)
 
     fcntl( serfd, F_SETFL, FNDELAY);
 
-	// Set the serial options for JFY comms
+    // Set the serial options for JFY comms
     struct termios options;
     tcgetattr( serfd, &options );
     cfsetispeed( &options, B9600 );
@@ -298,22 +298,22 @@ int output_inverter(int len)
 }
 
 /**
-\brief	bit of a test
+\brief Test code
 */
 int test_inverter()
 {
-	printf("test\n");
-	debug = 1;
-	char *tmp = "A5A5010131BD2A0174099006050003097D13890000FFFF00005E1A000005D8000100000000000000000000000000000000F80A0A0D";
-	int msglen = strlen(tmp) / 2;
-	int idx;
-	unsigned char val;
-	for(idx = 0; idx < msglen; idx++) {
+    printf("test\n");
+    debug = 1;
+    char *tmp = "A5A5010131BD2A0174099006050003097D13890000FFFF00005E1A000005D8000100000000000000000000000000000000F80A0A0D";
+    int msglen = strlen(tmp) / 2;
+    int idx;
+    unsigned char val;
+    for(idx = 0; idx < msglen; idx++) {
         sscanf(tmp + idx*2, "%2hhx", &val);
         inbuffer[idx] = val;
     }
     output_inverter(msglen);
-	printf("end test\n");
+    printf("end test\n");
     return 0;
 }
 /**
@@ -328,8 +328,8 @@ int main(int argc, char *argv[])
         switch (opt)
         {
         case 'd':
-        	debug = 1;
-        	break;
+            debug = 1;
+            break;
         case 'p':
             serial_device = optarg;
             break;
@@ -347,23 +347,23 @@ int main(int argc, char *argv[])
 
     int serfd = open_serial(serial_device);
     if (serfd < 0) {
-    	log_output(LOG_ERR, "Failed to open serial port.");
-    	retval = 1;
-    	goto exit;
+        log_output(LOG_ERR, "Failed to open serial port.");
+        retval = 1;
+        goto exit;
     }
     if (init_inverter(serfd) <  0) {
-    	log_output(LOG_ERR, "Failed to register inverter.");
-    	retval = 2;
-    	goto exitclose;
+        log_output(LOG_ERR, "Failed to register inverter.");
+        retval = 2;
+        goto exitclose;
     }
     int len = read_inverter(serfd);
-	if (len < 0) {
-    	log_output(LOG_ERR, "Failed to read inverter data.");
-    	retval = 3;
-    	goto exitclose;
+    if (len < 0) {
+        log_output(LOG_ERR, "Failed to read inverter data.");
+        retval = 3;
+        goto exitclose;
     }
 
-	output_inverter(len);
+    output_inverter(len);
 
 exitclose:
     close(serfd);
