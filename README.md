@@ -10,31 +10,41 @@ This program was inspired by solarmonj by Adam Gray and John Croucher https://co
 To build the application under Linux or OSX
 
 ```
-$> gcc solarmon.c -o solarmon
-$> sudo cp solarmon /usr/bin
+pi@raspberrypi ~ $ gcc solarmon.c -o solarmon
+pi@raspberrypi ~ $ sudo cp solarmon /usr/bin
 ```
 
 To test the application you can run the following
 
 ```
-$> solarmon -d -p /dev
+pi@raspberrypi ~ $ solarmon -d -p /dev
 Failed to open serial port.
-$> 
+
+pi@raspberrypi ~ $
 ```
 
 Then if you know which serial port you are using
 ```
-$> solarmon -d -p /dev/ttyS0
+pi@raspberrypi ~ $ solarmon -d -p /dev/ttyS0
 ==> A5A50100304400FE410A0D
 ==> A5A50100304000FE450A0D
 Failed to register inverter.
-$>
+
+pi@raspberrypi ~ $
 ```
 
 And finally if you have the inverter attached to your system
 ```
-$> solarmon -d -p /dev/ttyUSB0
+pi@raspberrypi ~ $ ./solarmon -d -p /dev/ttyUSB0 
+==> A5A50100304400FE410A0D
+==> A5A50100304000FE450A0D
+<== A5A5000030BF1031353133313331323130313438202020FAC80A0D
+==> A5A501003041113135313331333132313031343820202001FB430A0D
+<== A5A5010130BE0106FDBF0A0D
+==> A5A50101314200FE410A0D
+<== A5A5010131BD2A01D608B9084E000C0973138C00C8FFFF00005EF9000005E4000100000000000000000000000000000000F5800A0D
+temp:47.000000 TodayE:22.330000 VDC:212.600006 I:1.200000 VAC:241.899994 Freq:50.040001 CurrE:200.000000 unk1:65535.000000 unk2:0.000000 TotE:2431.300049
 
-$>
+pi@raspberrypi ~ $
 ```
 
