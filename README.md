@@ -35,7 +35,7 @@ pi@raspberrypi ~ $
 
 And finally if you have the inverter attached to your system
 ```
-pi@raspberrypi ~ $ ./solarmon -d -p /dev/ttyUSB0 
+pi@raspberrypi ~ $ ./solarmon -d -p /dev/ttyUSB0
 ==> A5A50100304400FE410A0D
 ==> A5A50100304000FE450A0D
 <== A5A5000030BF1031353133313331323130313438202020FAC80A0D
