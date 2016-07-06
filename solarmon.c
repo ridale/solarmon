@@ -37,25 +37,25 @@ char *serial_device = "/dev/ttyS0";
 char *log_path = NULL;
 
 /**
-\brief  Log to console or syslog.
-\author rdl
-*/
+ * Log to the console stdout if we are an info level message
+ * stderr for all other messages
+ * \brief  Log to console
+ * \author rdl
+ */
 void log_output(int priority, char* message)
 {
-    if (debug) {
-        if (priority == LOG_ERR)
-            fprintf(stderr, "%s\n", message);
-        else
-            printf("%s\n", message);
-    }
+    if (priority != LOG_INFO)
+        fprintf(stderr, "%s\n", message);
     else
-      syslog(priority, "%s", message);
+        printf("%s\n", message);
 }
 
 /**
-\brief  Debug method to print buffer as hex string.
-\author rdl
-*/
+ * prints debug info to stderr means we can still run the monitor even if we
+ * are debugging
+ * \brief  Debug method to print buffer as hex string.
+ * \author rdl
+ */
 void dumphex(unsigned char* buf, int buflen, int out)
 {
     if (buflen < 1) return;
@@ -63,14 +63,14 @@ void dumphex(unsigned char* buf, int buflen, int out)
     else        printf("<== ");
     int i;
     for (i = 0; i < buflen; i++)
-        printf("%02X", buf[i]);
-    printf("\n");
+        fprintf(stderr, "%02X", buf[i]);
+    fprintf(stderr,"\n");
 }
 
 /**
-\brief  Calculate sum as per JFY
-\author rdl
-*/
+ * \brief  Calculate sum as per JFY
+ * \author rdl
+ */
 unsigned short checksum(int length)
 {
     unsigned short sum = 0;
@@ -84,9 +84,9 @@ unsigned short checksum(int length)
 }
 
 /**
-\brief  Creates a JFY inverter command.
-\author rdl
-*/
+ * \brief  Creates a JFY inverter command.
+ * \author rdl
+ */
 int create_command(char ctl, char func, unsigned char* data, int len)
 {
     int cmdlength = len;
@@ -114,9 +114,9 @@ int create_command(char ctl, char func, unsigned char* data, int len)
 }
 
 /**
-\brief  Sets up the serial port for JFY comms.
-\author rdl
-*/
+ * \brief  Sets up the serial port for JFY comms.
+ * \author rdl
+ */
 int open_serial(char* serial_device)
 {
     int serfd = open(serial_device, O_RDWR | O_NOCTTY | O_NDELAY);
@@ -138,18 +138,18 @@ int open_serial(char* serial_device)
 }
 
 /**
-\brief  Write to the serial port
-\author rdl
-*/
+ * \brief  Write to the serial port
+ * \author rdl
+ */
 int write_serial(int serfd, int cmdlength)
 {
     return write(serfd, outbuffer, cmdlength);
 }
 
 /**
-\brief  Read from the serial port
-\author rdl
-*/
+ * \brief  Read from the serial port
+ * \author rdl
+ */
 int read_serial(int serfd)
 {
     int finished = 0;
@@ -184,9 +184,9 @@ int read_serial(int serfd)
 }
 
 /**
-\brief  Close the serial port
-\author rdl
-*/
+ * \brief  Close the serial port
+ * \author rdl
+ */
 void close_serial(int serfd)
 {
     if (serfd < 0) return;
@@ -194,9 +194,9 @@ void close_serial(int serfd)
 }
 
 /**
-\brief  Setup the inverter for comms.
-\author rdl
-*/
+ * \brief  Setup the inverter for comms.
+ * \author rdl
+ */
 int init_inverter(int serfd)
 {
     int len = 0;
@@ -242,9 +242,9 @@ int init_inverter(int serfd)
 }
 
 /**
-\brief  Read the inverter data.
-\author rdl
-*/
+ * \brief  Read the inverter data.
+ * \author rdl
+ */
 int read_inverter(int serfd)
 {
     int len = 0;
@@ -262,9 +262,9 @@ int read_inverter(int serfd)
 }
 
 /**
-\brief  Writes the inverter data
-\author rdl
-*/
+ * \brief  Writes the inverter data
+ * \author rdl
+ */
 int output_inverter(int len)
 {
     if (len < headerlen + 20) return -1;
@@ -287,19 +287,17 @@ int output_inverter(int len)
         temp, todayE, VDC, I, VAC, freq, currE, unk1, unk2, totE );
 
     if (log_path == NULL) {
-      // log to syslog or console
-      log_output(LOG_WARNING, str);
-    }
-    else {
-      // log to csv file
+      // log to console
+      log_output(LOG_INFO, str);
     }
 
     return 0;
 }
 
 /**
-\brief Test code
-*/
+ * TODO move to unit test framework (google)
+ * \brief Test code
+ */
 int test_inverter()
 {
     printf("test\n");
@@ -317,14 +315,14 @@ int test_inverter()
     return 0;
 }
 /**
-\brief  main program entry point.
-\author rdl
-*/
+ * \brief  main program entry point.
+ * \author rdl
+ */
 int main(int argc, char *argv[])
 {
     int opt, retval = 0;
 
-    while ((opt = getopt(argc, argv, "dfp:l:")) != -1) {
+    while ((opt = getopt(argc, argv, "dp:")) != -1) {
         switch (opt)
         {
         case 'd':
@@ -333,14 +331,10 @@ int main(int argc, char *argv[])
         case 'p':
             serial_device = optarg;
             break;
-        case 'l':
-            log_path = optarg;
-            break;
         default: /* '?' */
-            fprintf(stderr, "Usage: %s [-p /dev/ttyS0] [-f] [-l /var/log/solarmonj/]\n",argv[0]);
-            fprintf(stderr, "[-p /dev/ttyS0]          The serial port that the JFY is connected to\n");
-            fprintf(stderr, "[-l /var/log/solarmonj/] Path to log\n");
-            fprintf(stderr, "[-f]                     Whether to log to the csv file\n");
+            fprintf(stderr, "Usage: %s [-p /dev/ttyS0]\n",argv[0]);
+            fprintf(stderr, "[-d]                     Set the debug flag, shows more output.\n");
+            fprintf(stderr, "[-p /dev/ttyS0]          The serial port that the JFY is connected to.\n");
             exit(EXIT_FAILURE);
         }
     }
