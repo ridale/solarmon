@@ -48,3 +48,11 @@ temp:47.000000 TodayE:22.330000 VDC:212.600006 I:1.200000 VAC:241.899994 Freq:50
 pi@raspberrypi ~ $
 ```
 
+You can then add the program to your system's cron to run every minute appending to a file, for example:
+```
+pi@raspberrypi ~ $ sudo -i
+pi@raspberrypi ~ # echo "# Run solarmon every minute" > /etc/cron.d/solarmon
+pi@raspberrypi ~ # echo "* * * * * root /usr/bin/solarmon -p /dev/ttyUSB0 >> /tmp/solarmon-out" >> /etc/cron.d/solarmon
+pi@raspberrypi ~ # exit
+pi@raspberrypi ~ $
+```
