@@ -56,3 +56,7 @@ pi@raspberrypi ~ # echo "* * * * * root /usr/bin/solarmon -p /dev/ttyUSB0 >> /tm
 pi@raspberrypi ~ # exit
 pi@raspberrypi ~ $
 ```
+or this line to add to the system logs
+```
+pi@raspberrypi ~ # echo "* * * * * root /usr/bin/solarmon -p /dev/ttyUSB0 | /usr/bin/logger" >> /etc/cron.d/solarmon
+```
