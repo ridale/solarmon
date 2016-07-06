@@ -10,7 +10,7 @@ This program was inspired by solarmonj by Adam Gray and John Croucher https://co
 To build the application under Linux or OSX
 
 ```
-pi@raspberrypi ~ $ gcc solarmon.c -o solarmon
+pi@raspberrypi ~ $ make 
 pi@raspberrypi ~ $ sudo cp solarmon /usr/bin
 ```
 
