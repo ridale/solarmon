@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=
+CFLAGS= -std=gnu11
 
 
 all: solarmon
