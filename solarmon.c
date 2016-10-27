@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <termios.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -47,7 +48,7 @@ void log_output(int priority, char* message)
     if (priority != LOG_INFO)
         fprintf(stderr, "%s\n", message);
     else
-        printf("%s\n", message);
+        printf("%s", message);
 }
 
 /**
@@ -270,20 +271,20 @@ int output_inverter(int len)
     if (len < headerlen + 20) return -1;
     unsigned char *buf = &inbuffer[headerlen];
 
-    float temp   = ((buf[0] << 8)  + buf[1]) / 10.0;
-    float todayE = ((buf[2] << 8)  + buf[3]) / 100.0;
-    float VDC    = ((buf[4] << 8)  + buf[5]) / 10.0;
-    float I      = ((buf[6] << 8)  + buf[7]) / 10.0;
-    float VAC    = ((buf[8] << 8)  + buf[9]) / 10.0;
-    float freq   = ((buf[10] << 8) + buf[11]) / 100.0;
-    float currE  = ((buf[12] << 8) + buf[13]);
-    float unk1   = ((buf[14] << 8) + buf[15]);
-    float unk2   = ((buf[16] << 8) + buf[17]);
-    float totE   = ((buf[18] << 8) + buf[19]) / 10.0;
+    int16_t temp   = ((buf[0] << 8)  + buf[1]); // 10.0;
+    uint16_t todayE = ((buf[2] << 8)  + buf[3]); // 100.0;
+    uint16_t VDC    = ((buf[4] << 8)  + buf[5]); // 10.0;
+    uint16_t I      = ((buf[6] << 8)  + buf[7]); // 10.0;
+    uint16_t VAC    = ((buf[8] << 8)  + buf[9]); // 10.0;
+    uint16_t freq   = ((buf[10] << 8) + buf[11]); // 100.0;
+    uint16_t currE  = ((buf[12] << 8) + buf[13]);
+    int16_t unk1   = ((buf[14] << 8) + buf[15]);
+    int16_t unk2   = ((buf[16] << 8) + buf[17]);
+    uint16_t totE   = ((buf[18] << 8) + buf[19]); // 10.0;
 
     char str[512];
-    bzero(str, 512);
-    snprintf(str, 512, "temp:%f TodayE:%f VDC:%f I:%f VAC:%f Freq:%f CurrE:%f unk1:%f unk2:%f TotE:%f\n",
+    memset(str,0, 512);
+    snprintf(str, 512, "{temperature:%d,energytoday:%u,VDC:%u,I:%u,VAC:%u,freq:%u,W:%u,unk1:%d,unk2:%d,totalenergy:%u}",
         temp, todayE, VDC, I, VAC, freq, currE, unk1, unk2, totE );
 
     if (log_path == NULL) {
@@ -365,4 +366,3 @@ exit:
     serfd = -1;
     return retval;
 }
-
