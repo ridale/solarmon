@@ -60,3 +60,13 @@ or this line to add to the system logs
 ```
 pi@raspberrypi ~ # echo "* * * * * root /usr/bin/solarmon -p /dev/ttyUSB0 | /usr/bin/logger" >> /etc/cron.d/solarmon
 ```
+The following script can be used to post the json output for the newer version to an emoncms instance.
+```
+#!/bin/bash
+# post the output of the solarmon command to emoncms
+
+JSON=`/home/pi/data/solarmon/solarmon -p /dev/ttyUSB0`
+[[ $? -ne 0 ]] && exit 0
+curl "http://localhost/emoncms/input/post.json?node=1&apikey=788a824374bb94d6b4747e1e930f8c9c&json=${JSON}" 
+```
+You will need to put your own API key in, the above is a md5 sum of the source.
