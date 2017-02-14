@@ -284,7 +284,7 @@ int output_inverter(int len)
 
     char str[512];
     memset(str,0, 512);
-    snprintf(str, 512, "{temperature:%d,energytoday:%u,VDC:%u,I:%u,VAC:%u,freq:%u,W:%u,unk1:%d,unk2:%d,totalenergy:%u}",
+    snprintf(str, 512, "{\"temperature\":%d,\"energytoday\":%u,\"VDC\":%u,\"I\":%u,\"VAC\":%u,\"freq\":%u,\"W\":%u,\"unk1\":%d,\"unk2\":%d,\"totalenergy\":%u}",
         temp, todayE, VDC, I, VAC, freq, currE, unk1, unk2, totE );
 
     if (log_path == NULL) {
