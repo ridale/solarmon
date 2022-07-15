@@ -29,6 +29,8 @@
 #include <errno.h>
 
 int debug = 0;
+int suntwin = 0;
+
 unsigned char outbuffer[256];
 unsigned char inbuffer[256];
 const unsigned char sourceaddr = 1;
@@ -271,15 +273,15 @@ int output_inverter(int len)
     if (len < headerlen + 20) return -1;
     unsigned char *buf = &inbuffer[headerlen];
 
-    int16_t temp   = ((buf[0] << 8)  + buf[1]); // 10.0;
+    int16_t temp    = ((buf[0] << 8)  + buf[1]); // 10.0;
     uint16_t todayE = ((buf[2] << 8)  + buf[3]); // 100.0;
     uint16_t VDC    = ((buf[4] << 8)  + buf[5]); // 10.0;
     uint16_t I      = ((buf[6] << 8)  + buf[7]); // 10.0;
     uint16_t VAC    = ((buf[8] << 8)  + buf[9]); // 10.0;
     uint16_t freq   = ((buf[10] << 8) + buf[11]); // 100.0;
     uint16_t currE  = ((buf[12] << 8) + buf[13]);
-    int16_t unk1   = ((buf[14] << 8) + buf[15]);
-    int16_t unk2   = ((buf[16] << 8) + buf[17]);
+    int16_t unk1    = ((buf[14] << 8) + buf[15]);
+    int16_t unk2    = ((buf[16] << 8) + buf[17]);
     uint16_t totE   = ((buf[18] << 8) + buf[19]); // 10.0;
 
     char str[512];
@@ -296,7 +298,40 @@ int output_inverter(int len)
 }
 
 /**
- * TODO move to unit test framework (google)
+ * \brief  Writes the Suntwin 4000TL inverter data
+ * \author srrsparky
+ */
+int output_twin_inverter(int len)
+{
+    if (len < headerlen + 20) return -1;
+    unsigned char *buf = &inbuffer[headerlen];
+
+    int16_t Temp    = ((buf[0] << 8)  + buf[1]); // 10.0;
+    uint16_t VDC1   = ((buf[2] << 8)  + buf[3]);
+    uint16_t VDC2   = ((buf[4] << 8)  + buf[5]); // 10.0;
+    uint16_t IDC1   = ((buf[6] << 8)  + buf[7]);
+    uint16_t IDC2   = ((buf[8] << 8)  + buf[9]);
+    uint16_t TodayE = ((buf[10] << 8) + buf[11]); // 100.0;
+    uint16_t IAC    = ((buf[12] << 8) + buf[13]); // 10.0;
+    uint16_t VAC    = ((buf[14] << 8) + buf[15]); // 10.0;
+    uint16_t FAC    = ((buf[16] << 8) + buf[17]); // 100.0;
+    int16_t CurrP   = ((buf[18] << 8) + buf[19]);
+
+    char str[512];
+    memset(str,0, 512);
+    snprintf(str, 512, "{\"Temp\":%d,\"VDC1\":%u,\"VDC2\":%u,\"IDC1\":%u,\"IDC2\":%u,\"TodayE\":%u,\"IAC\":%u,\"VAC\":%u,\"FAC\":%u,\"CurrP\":%d}",
+        Temp, VDC1, VDC2, IDC1, IDC2, TodayE, IAC, VAC, FAC, CurrP );
+
+    if (log_path == NULL) {
+      // log to console
+      log_output(LOG_INFO, str);
+    }
+
+    return 0;
+}
+
+/**
+ * TODO move to unit test framework
  * \brief Test code
  */
 int test_inverter()
@@ -323,11 +358,14 @@ int main(int argc, char *argv[])
 {
     int opt, retval = 0;
 
-    while ((opt = getopt(argc, argv, "dp:")) != -1) {
+    while ((opt = getopt(argc, argv, "dtp:")) != -1) {
         switch (opt)
         {
         case 'd':
             debug = 1;
+            break;
+        case 't':
+            suntwin = 1;
             break;
         case 'p':
             serial_device = optarg;
@@ -335,6 +373,7 @@ int main(int argc, char *argv[])
         default: /* '?' */
             fprintf(stderr, "Usage: %s [-p /dev/ttyS0]\n",argv[0]);
             fprintf(stderr, "[-d]                     Set the debug flag, shows more output.\n");
+            fprintf(stderr, "[-t]                     Set the suntwin flag, for suntwin inverters.\n");
             fprintf(stderr, "[-p /dev/ttyS0]          The serial port that the JFY is connected to.\n");
             exit(EXIT_FAILURE);
         }
@@ -358,7 +397,12 @@ int main(int argc, char *argv[])
         goto exitclose;
     }
 
-    output_inverter(len);
+    if (suntwin) {
+        output_twin_inverter(len);
+    }
+    else {
+        output_inverter(len);
+    }
 
 exitclose:
     close(serfd);
